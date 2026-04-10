@@ -41,7 +41,7 @@ async function fetchHustles(profile){
   const ctrl=new AbortController();
   const t=setTimeout(()=>ctrl.abort(),28000);
   try{
-    const r=await fetch("/api/hustle",{method:"POST",headers:{"Content-Type":"application/json"},signal:ctrl.signal,body:JSON.stringify({model:"claude-3-haiku-20240307",max_tokens:3500,messages:[{role:"user",content:`You are a South African side hustle expert. Generate 6 personalised side hustles for:
+    const r=await fetch("/api/hustle",{method:"POST",headers:{"Content-Type":"application/json"},signal:ctrl.signal,body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:3500,messages:[{role:"user",content:`You are a South African side hustle expert. Generate 6 personalised side hustles for:
 - Skills: ${skills}
 - Province: ${profile.province}, ${profile.locationType}
 - Hours/week: ${profile.hours}
