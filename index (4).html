@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>workmoneyZA — Find Your Perfect SA Side Hustle</title>
+<meta name="description" content="AI-powered side hustle finder for South Africans. Free, personalised to your skills, location and time. Real rand. Real results."/>
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="alternate icon" href="/favicon.ico"/>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://workmoneyza.vercel.app/"/>
+<meta property="og:title" content="workmoneyZA — Find Your Perfect SA Side Hustle"/>
+<meta property="og:description" content="AI-powered side hustle finder for South Africans. Free, personalised to your skills, location and time. Real rand. Real results."/>
+<meta property="og:image" content="https://workmoneyza.vercel.app/og-image.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:site_name" content="workmoneyZA"/>
+<meta property="og:locale" content="en_ZA"/>
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:url" content="https://workmoneyza.vercel.app/"/>
+<meta name="twitter:title" content="workmoneyZA — Find Your Perfect SA Side Hustle"/>
+<meta name="twitter:description" content="AI-powered side hustle finder for South Africans. Free, personalised to your skills, location and time. Real rand. Real results."/>
+<meta name="twitter:image" content="https://workmoneyza.vercel.app/og-image.png"/>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body,html{font-family:'DM Sans','Helvetica Neue',sans-serif;background:#080808;color:#f0f0f0;min-height:100vh}
+input,select,textarea,button{font-family:inherit}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:#222;border-radius:2px;width:100%;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#22c55e;cursor:pointer;border:2px solid #000}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.5)}60%{box-shadow:0 0 0 14px rgba(34,197,94,0)}}.pulse{animation:pulse 2.2s infinite}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;document.head.appendChild(s);}
+loadScript('https://unpkg.com/react@18/umd/react.production.min.js',function(){
+  loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',function(){init();});
+});
+function init(){
+// ── Added useRef to the destructure (needed for isPopState ref)
+const {useState,useEffect,useCallback,useRef}=React;
+const G="#22c55e",BG="#080808",CARD="#111",CARD2="#161616",BORDER="#242424",MUTED="#5c6370";
+const DIFF={Beginner:"#22c55e",Intermediate:"#f59e0b",Advanced:"#ef4444"};
+
+// ── FIX 1: Set your PayFast merchant ID here when you have one.
+//    While null, the button is disabled and labelled "Coming Soon".
+const PAYFAST_MERCHANT_ID = null; // e.g. "12345678"
+
+const SKILLS=["Driving","Cooking","Teaching","Design","Coding","Writing","Sales","Social Media","Handyman","Photography","Baking","Tutoring","Cleaning","Gardening","Music","Video Editing","Translation","Fitness Training","Beauty & Hair","Crafts","Plumbing","Electrical","Car Washing","Delivery Driving","Uber/Bolt Driving","Reselling","Flipping Items","Phone Repair","PC Repair","Event Hosting","DJ Services","MC Services","Childcare","Elderly Care","Pet Sitting","Dog Walking","Laundry Services","Cooking for Events","Meal Prep","Tiling","Painting","Roofing","Security Services","Photography (Events)","Videography","Drone Work","Social Media Management","Copywriting","AI Tools","Data Entry","Virtual Assistant","Homework Help","Organising"];
+const PROVINCES=["Gauteng","Western Cape","KwaZulu-Natal","Eastern Cape","Free State","Limpopo","Mpumalanga","North West","Northern Cape"];
+const CAPITAL=["R0 (No capital)","R100 – R500","R500 – R1 000","R1 000 – R5 000","R5 000 – R10 000","R10 000+"];
+const MSGS=["Scanning SA market opportunities…","Matching your skills to hustles…","Finding fastest path to income…","Checking load-shedding safe options…","Calculating your earning potential…","Analysing your province's best opportunities…"];
+const TESTIMONIALS=[{name:"Thandi M.",loc:"Soweto, Gauteng",av:"👩🏾",text:"Started dog walking after using workmoneyZA. Made R4 200 in my first month with zero startup cost!",hustle:"Dog Walking",earned:"R4 200/mo"},{name:"Sipho K.",loc:"Mitchells Plain, Cape Town",av:"👨🏿",text:"AI matched me to car washing in my suburb. R7 500 last month working weekends only.",hustle:"Car Washing",earned:"R7 500/mo"},{name:"Priya N.",loc:"Durban North, KZN",av:"👩🏽",text:"Used AI Tools hustle to offer ChatGPT services to businesses. Now earning more than my day job!",hustle:"AI Tools",earned:"R12 000/mo"}];
+const ATOOLS=[{name:"Canva",e:"🎨",b:"Design flyers & logos — free plan",url:"https://canva.com"},{name:"Yoco",e:"💳",b:"Accept card payments in SA",url:"https://yoco.com"},{name:"Fiverr",e:"💼",b:"Sell skills to global clients",url:"https://fiverr.com"},{name:"Takealot Seller",e:"🛒",b:"Reach 10M+ SA shoppers",url:"https://seller.takealot.com"},{name:"Udemy",e:"📚",b:"Upskill to charge more",url:"https://udemy.com"},{name:"Shopify",e:"🏪",b:"Launch your SA online store",url:"https://shopify.com"}];
+const FREE_RES=[{cat:"Affiliate Programs",items:[{name:"Digistore24",e:"💰",badge:"FREE",desc:"SA-friendly marketplace. Earn up to 70% commission. No approval needed.",url:"https://www.digistore24.com",earn:"20–70%"},{name:"ClickBank",e:"🏦",badge:"FREE",desc:"World's largest digital marketplace. Pays weekly.",url:"https://clickbank.com",earn:"Up to 75%"},{name:"Amazon Associates",e:"📦",badge:"FREE",desc:"Promote any Amazon product and earn a % of every sale.",url:"https://affiliate-program.amazon.com",earn:"1–10%"},{name:"Impact.com",e:"🔗",badge:"FREE",desc:"Partner with Canva, Uber, Airbnb.",url:"https://impact.com",earn:"Varies"},{name:"ShareASale",e:"🤝",badge:"FREE",desc:"30,000+ programs. Fashion, tech, home, finance.",url:"https://shareasale.com",earn:"5–50%"},{name:"Takealot Affiliate",e:"🛍️",badge:"FREE",desc:"SA's #1 retailer affiliate program.",url:"https://www.takealot.com/static/page/affiliates",earn:"2–8%"}]},{cat:"Free Courses",items:[{name:"Google Digital Garage",e:"🎓",badge:"FREE",desc:"Certified digital marketing courses. Globally recognised.",url:"https://grow.google/intl/en_za/",earn:"Boosts rates"},{name:"HubSpot Academy",e:"📈",badge:"FREE",desc:"Marketing, sales & content certifications.",url:"https://academy.hubspot.com",earn:"Boosts rates"},{name:"Meta Blueprint",e:"📱",badge:"FREE",desc:"Learn Facebook & Instagram ads from Meta itself.",url:"https://www.facebook.com/business/learn",earn:"Charge R2k–8k/mo"},{name:"Google Skillshop",e:"🔍",badge:"FREE",desc:"Official Google Ads & Analytics certification.",url:"https://skillshop.withgoogle.com",earn:"Charge R3k–10k/mo"},{name:"Alison.com",e:"🎒",badge:"FREE",desc:"2,000+ courses — business, IT, trades.",url:"https://alison.com",earn:"Boosts rates"},{name:"YouTube Learning",e:"▶️",badge:"FREE",desc:"Thousands of free SA hustle & affiliate tutorials.",url:"https://youtube.com",earn:"Learn free"}]},{cat:"Free Tools",items:[{name:"Canva Free",e:"🎨",badge:"FREE",desc:"Create flyers, logos, posts. No design skill needed.",url:"https://canva.com",earn:"Save R500+/mo"},{name:"Mailchimp",e:"📧",badge:"FREE",desc:"Email list up to 500. Newsletter automation.",url:"https://mailchimp.com",earn:"Passive income"},{name:"Buffer",e:"📅",badge:"FREE",desc:"Schedule posts on Facebook, Instagram, Twitter.",url:"https://buffer.com",earn:"Save 5hrs/week"},{name:"Bitly",e:"🔗",badge:"FREE",desc:"Shorten & track affiliate links.",url:"https://bitly.com",earn:"Track earnings"},{name:"Google Analytics",e:"📊",badge:"FREE",desc:"Track visitors, sources, conversions.",url:"https://analytics.google.com",earn:"Data = money"},{name:"Notion",e:"📓",badge:"FREE",desc:"Organise hustles, clients, content.",url:"https://notion.so",earn:"Stay organised"}]}];
+
+async function fetchHustles(profile){
+  const skills=[...new Set([...profile.skills,...profile.custom])].join(", ")||"General skills";
+  const zero=profile.capital==="R0 (No capital)";
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),28000);
+  try{
+    const r=await fetch("/api/hustle",{method:"POST",headers:{"Content-Type":"application/json"},signal:ctrl.signal,body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:3500,messages:[{role:"user",content:`You are a South African side hustle expert. Generate 6 personalised side hustles for:
+- Skills: ${skills}
+- Province: ${profile.province}, ${profile.locationType}
+- Hours/week: ${profile.hours}
+- Employment: ${profile.employment}
+- Capital: ${profile.capital}
+- Income goal: R${profile.goal}/month
+${zero?"All hustles MUST have startupCost: 0":""}
+Respond with ONLY a raw JSON array, no markdown, no code fences:
+[{"id":"h1","title":"Name","description":"One sentence","earningsMin":2000,"earningsMax":6000,"startupCost":0,"difficulty":"Beginner","timeToFirstIncome":"3 days","loadSheddingSafe":true,"offline":false,"reason":"Why this suits them specifically","tools":[{"name":"Gumtree","url":"https://www.gumtree.co.za"}],"startTodaySteps":["Step 1","Step 2","Step 3","Step 4","Step 5"],"whatsappPitch":"Full ready-to-paste WhatsApp message.","gumtreeUrl":"https://www.gumtree.co.za/","facebookUrl":"https://www.facebook.com/marketplace/","clientFindingTip":"Specific tip for ${profile.province}"}]
+Return exactly 6 hustles. difficulty: Beginner, Intermediate, or Advanced.`}]})});
+    if(!r.ok){const e=await r.text().catch(()=>"");throw new Error(`API ${r.status}: ${e.slice(0,100)}`);}
+    const d=await r.json();
+    const raw=d.content?.map(b=>b.text||"").join("")||"";
+    const m=raw.match(/\[[\s\S]*\]/);
+    if(!m)throw new Error("No JSON found in response");
+    return JSON.parse(m[0]);
+  }finally{clearTimeout(t);}
+}
+
+const h=React.createElement;
+const Bdg=({color,children})=>h("span",{style:{background:color+"22",color,border:`1px solid ${color}44`,borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:600,display:"inline-flex",alignItems:"center",whiteSpace:"nowrap"}},children);
+const Logo=({onClick})=>h("span",{onClick,style:{fontSize:20,fontWeight:800,cursor:"pointer",letterSpacing:-0.5,color:"#f0f0f0",fontFamily:"serif"}},"workmoney",h("span",{style:{color:G}},"ZA"));
+const PBar=({step})=>h("div",{style:{display:"flex",gap:6,padding:"16px 16px 0"}},[1,2,3].map(n=>h("div",{key:n,style:{flex:1,height:3,borderRadius:2,background:n<=step?G:"#222"}})));
+const BTop=({v})=>v?h("button",{onClick:()=>window.scrollTo({top:0,behavior:"smooth"}),style:{position:"fixed",bottom:24,right:20,width:44,height:44,borderRadius:"50%",background:G,border:"none",color:"#000",fontSize:20,cursor:"pointer",zIndex:90,boxShadow:"0 4px 20px rgba(34,197,94,0.4)"}},"↑"):null;
+
+function NavBar({right,onLogo}){
+  return h("nav",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 20px",borderBottom:`1px solid ${BORDER}`,position:"sticky",top:0,background:BG+"ee",backdropFilter:"blur(12px)",zIndex:100}},
+    h(Logo,{onClick:onLogo}),
+    h("div",{style:{display:"flex",alignItems:"center",gap:8}},right)
+  );
+}
+
+function HCard({h:hh,saved,onSave,onDetail,expanded,onToggle}){
+  return h("div",{style:{background:CARD,border:`1px solid ${expanded?G+"50":BORDER}`,borderRadius:16,padding:16,marginBottom:12}},
+    h("div",{style:{display:"flex",justifyContent:"space-between",gap:10}},
+      h("div",{style:{flex:1}},h("div",{style:{fontWeight:700,fontSize:16,lineHeight:1.3,fontFamily:"serif"}},hh.title),h("div",{style:{color:MUTED,fontSize:13,marginTop:4,lineHeight:1.5}},hh.description)),
+      h("button",{onClick:onSave,style:{background:"none",border:"none",fontSize:22,cursor:"pointer",color:saved?G:"#333",flexShrink:0,padding:0}},saved?"★":"☆")
+    ),
+    h("div",{style:{display:"flex",gap:20,marginTop:12}},
+      h("div",null,h("div",{style:{fontSize:11,color:MUTED,marginBottom:2}},"Earnings/mo"),h("div",{style:{color:G,fontWeight:700,fontSize:14,fontFamily:"monospace"}},"R"+(hh.earningsMin||0).toLocaleString("en-ZA")+" – R"+(hh.earningsMax||0).toLocaleString("en-ZA"))),
+      h("div",null,h("div",{style:{fontSize:11,color:MUTED,marginBottom:2}},"Startup"),h("div",{style:{fontWeight:700,fontSize:14,color:hh.startupCost===0?G:"#f0f0f0"}},hh.startupCost===0?"R0":"R"+(hh.startupCost||0).toLocaleString("en-ZA")))
+    ),
+    h("div",{style:{display:"flex",flexWrap:"wrap",gap:6,marginTop:10}},
+      h(Bdg,{color:DIFF[hh.difficulty]||G},hh.difficulty),
+      hh.timeToFirstIncome&&h(Bdg,{color:MUTED},"⏱ "+hh.timeToFirstIncome),
+      hh.loadSheddingSafe&&h(Bdg,{color:G},"⚡ Load-safe"),
+      hh.offline&&h(Bdg,{color:MUTED},"📶 Offline ok")
+    ),
+    hh.tools?.length>0&&h("div",{style:{marginTop:10,fontSize:12,color:MUTED}},"Tools: "+hh.tools.map(t=>t.name).join(", ")),
+    expanded&&hh.startTodaySteps&&h("div",{style:{marginTop:14,padding:14,background:"#0c180c",borderRadius:10,border:`1px solid ${G}30`}},
+      h("div",{style:{fontSize:11,color:G,fontWeight:700,marginBottom:10}},"🚀 START TODAY"),
+      hh.startTodaySteps.slice(0,3).map((s,i)=>h("div",{key:i,style:{fontSize:12,color:"#bbb",marginBottom:6,display:"flex",gap:8}},h("span",{style:{color:G,fontWeight:700,flexShrink:0}},i+1+"."),h("span",{style:{lineHeight:1.5}},s))),
+      hh.startTodaySteps.length>3&&h("div",{style:{fontSize:11,color:MUTED,marginTop:4}},"+"+( hh.startTodaySteps.length-3)+" more in full view")
+    ),
+    h("div",{style:{display:"flex",gap:8,marginTop:14}},
+      h("button",{onClick:onToggle,style:{flex:1,borderRadius:12,padding:"10px",fontSize:13,border:`1px solid ${BORDER}`,cursor:"pointer",background:"transparent",color:"#ccc",fontWeight:500}},expanded?"▲ Less":"▼ Quick Plan"),
+      h("button",{onClick:onDetail,style:{flex:1.5,background:G,color:"#000",border:"none",borderRadius:12,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer"}},"Full Plan →")
+    )
+  );
+}
+
+function Detail({hh,saved,onSave,onClose,steps,onStep}){
+  const [cpd,setCpd]=useState(null);
+  const done=hh.startTodaySteps?.filter((_,i)=>steps[hh.id+"-"+i]).length||0;
+  const total=hh.startTodaySteps?.length||0;
+  const pct=total?Math.round((done/total)*100):0;
+  const copy=async(text,id)=>{try{await navigator.clipboard.writeText(text);}catch{}setCpd(id);setTimeout(()=>setCpd(null),2000);};
+  return h("div",{style:{position:"fixed",inset:0,background:"#000000cc",zIndex:200,overflowY:"auto"},onClick:onClose},
+    h("div",{onClick:e=>e.stopPropagation(),style:{background:"#0f0f0f",maxWidth:600,margin:"0 auto",minHeight:"100vh",borderLeft:`1px solid ${BORDER}`,borderRight:`1px solid ${BORDER}`,paddingBottom:80}},
+      h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",borderBottom:`1px solid ${BORDER}`,position:"sticky",top:0,background:"#0f0f0f",zIndex:10}},
+        h("button",{onClick:onClose,style:{background:CARD2,border:`1px solid ${BORDER}`,color:"#aaa",borderRadius:8,padding:"7px 12px",fontSize:13,cursor:"pointer"}},"✕ Close"),
+        h("button",{onClick:onSave,style:{background:saved?G+"22":CARD2,border:`1px solid ${saved?G:BORDER}`,color:saved?G:"#aaa",borderRadius:8,padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer"}},saved?"★ Saved":"☆ Save")
+      ),
+      h("div",{style:{padding:"20px 16px"}},
+        h("h2",{style:{fontFamily:"serif",fontSize:22,fontWeight:700,lineHeight:1.2,color:"#f0f0f0"}},hh.title),
+        h("p",{style:{color:MUTED,fontSize:14,marginTop:8,lineHeight:1.6}},hh.description),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:18}},
+          [{label:"Monthly earnings",value:"R"+(hh.earningsMin||0).toLocaleString("en-ZA")+" – R"+(hh.earningsMax||0).toLocaleString("en-ZA"),color:G},{label:"Startup cost",value:hh.startupCost===0?"R0 — Free":"R"+(hh.startupCost||0).toLocaleString("en-ZA"),color:"#fff"},{label:"Time to income",value:hh.timeToFirstIncome||"—",color:"#fff"},{label:"Difficulty",value:hh.difficulty,color:DIFF[hh.difficulty]||G}].map(s=>h("div",{key:s.label,style:{background:CARD,borderRadius:12,padding:"12px 14px",border:`1px solid ${BORDER}`}},h("div",{style:{fontSize:11,color:MUTED,marginBottom:4}},s.label),h("div",{style:{fontWeight:700,fontSize:14,color:s.color}},s.value)))
+        ),
+        hh.reason&&h("div",{style:{marginTop:20,padding:14,background:"#0c180c",borderRadius:12,border:`1px solid ${G}30`}},h("div",{style:{fontSize:11,color:G,fontWeight:700,marginBottom:8}},"WHY THIS MATCHES YOU"),h("div",{style:{fontSize:14,color:"#ccc",lineHeight:1.6}},hh.reason)),
+        hh.startTodaySteps&&h("div",{style:{marginTop:24}},
+          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},h("div",{style:{fontFamily:"serif",fontSize:17,fontWeight:700,color:"#f0f0f0"}},"🚀 Start TODAY"),h("div",{style:{fontSize:12,color:pct===100?G:MUTED}},pct+"% done")),
+          h("div",{style:{height:3,background:"#222",borderRadius:2,marginBottom:16}},h("div",{style:{height:"100%",background:G,borderRadius:2,width:pct+"%",transition:"width 0.4s"}})),
+          hh.startTodaySteps.map((step,i)=>{
+            const isDone=steps[hh.id+"-"+i];
+            return h("div",{key:i,onClick:()=>onStep(hh.id,i),style:{display:"flex",alignItems:"flex-start",gap:12,padding:"12px 0",borderBottom:i<total-1?`1px solid ${BORDER}`:"none",cursor:"pointer"}},
+              h("div",{style:{width:22,height:22,borderRadius:"50%",flexShrink:0,marginTop:1,border:`2px solid ${isDone?G:"#333"}`,background:isDone?G:"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#000",fontWeight:800,transition:"all 0.2s"}},isDone?"✓":""),
+              h("span",{style:{fontSize:14,color:isDone?MUTED:"#ddd",textDecoration:isDone?"line-through":"none",lineHeight:1.55}},h("strong",{style:{color:isDone?MUTED:G,marginRight:4}},i+1+"."),step)
+            );
+          })
+        ),
+        h("div",{style:{marginTop:26}},
+          h("div",{style:{fontFamily:"serif",fontSize:17,fontWeight:700,marginBottom:12,color:"#f0f0f0"}},"⚡ Take Action Now"),
+          h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
+            hh.facebookUrl&&h("a",{href:hh.facebookUrl,target:"_blank",rel:"noreferrer",style:{display:"flex",alignItems:"center",justifyContent:"center",padding:"11px 10px",background:"#0d1a2e",border:"1px solid #1d4ed820",borderRadius:10,fontSize:12,fontWeight:600,color:"#fff",textDecoration:"none"}},"📘 Facebook Marketplace"),
+            hh.gumtreeUrl&&h("a",{href:hh.gumtreeUrl,target:"_blank",rel:"noreferrer",style:{display:"flex",alignItems:"center",justifyContent:"center",padding:"11px 10px",background:"#1a1600",border:"1px solid #fbbf2420",borderRadius:10,fontSize:12,fontWeight:600,color:"#fff",textDecoration:"none"}},"🔍 Gumtree SA"),
+            hh.whatsappPitch&&h("button",{onClick:()=>copy(hh.whatsappPitch,"pitch"),style:{display:"flex",alignItems:"center",justifyContent:"center",padding:"11px 10px",background:cpd==="pitch"?"#0c200c":"#0d1f0d",border:`1px solid ${cpd==="pitch"?G:G+"30"}`,borderRadius:10,fontSize:12,fontWeight:600,color:cpd==="pitch"?G:"#ccc",cursor:"pointer"}},cpd==="pitch"?"✓ Copied!":"📱 Copy WhatsApp Pitch")
+          )
+        ),
+        hh.whatsappPitch&&h("div",{style:{marginTop:16,padding:14,background:"#0d1f0d",borderRadius:12,border:`1px solid ${G}25`}},
+          h("div",{style:{fontSize:11,color:G,fontWeight:700,marginBottom:8}},"YOUR WHATSAPP PITCH"),
+          h("div",{style:{fontSize:13,color:"#bbb",lineHeight:1.6,fontStyle:"italic"}},hh.whatsappPitch),
+          h("button",{onClick:()=>copy(hh.whatsappPitch,"p2"),style:{marginTop:10,background:G,color:"#000",border:"none",borderRadius:8,padding:"8px 16px",fontSize:12,fontWeight:700,cursor:"pointer"}},cpd==="p2"?"✓ Copied!":"Copy")
+        ),
+        h("div",{style:{marginTop:26}},
+          h("div",{style:{fontFamily:"serif",fontSize:17,fontWeight:700,marginBottom:4,color:"#f0f0f0"}},"💡 Recommended Tools"),
+          h("div",{style:{fontSize:12,color:MUTED,marginBottom:14}},"Run this hustle like a pro"),
+          ATOOLS.map(t=>h("div",{key:t.name,style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",background:CARD,borderRadius:12,marginBottom:8,border:`1px solid ${BORDER}`}},
+            h("div",null,h("div",{style:{fontWeight:600,fontSize:14,color:"#f0f0f0"}},t.e+" "+t.name),h("div",{style:{color:MUTED,fontSize:12,marginTop:3}},t.b)),
+            h("a",{href:t.url,target:"_blank",rel:"noreferrer",style:{background:G,color:"#000",borderRadius:8,padding:"7px 14px",fontSize:12,fontWeight:700,textDecoration:"none",flexShrink:0,marginLeft:10}},"Get Started")
+          ))
+        )
+      )
+    )
+  );
+}
+
+function ResourcesPage({onBack}){
+  const [tab,setTab]=useState(0);
+  return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh"}},
+    h("nav",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 20px",borderBottom:`1px solid ${BORDER}`,position:"sticky",top:0,background:BG+"ee",backdropFilter:"blur(12px)",zIndex:100}},
+      h(Logo,{onClick:onBack}),h("button",{onClick:onBack,style:{background:CARD2,border:`1px solid ${BORDER}`,color:"#ccc",borderRadius:10,padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer"}},"← Back")
+    ),
+    h("div",{style:{padding:"24px 16px 80px",maxWidth:700,margin:"0 auto"}},
+      h("div",{style:{fontFamily:"serif",fontSize:26,fontWeight:700,marginBottom:6}},"Free Resources"),
+      h("div",{style:{color:MUTED,fontSize:14,marginBottom:20}},"Everything you need to earn online — all free to join"),
+      h("div",{style:{background:"linear-gradient(135deg,#0c1a0c,#0a120a)",border:`1px solid ${G}40`,borderRadius:14,padding:"16px 18px",marginBottom:24,display:"flex",alignItems:"center",gap:14}},
+        h("span",{style:{fontSize:28}},"💸"),h("div",null,h("div",{style:{fontFamily:"serif",fontWeight:700,fontSize:15}},"Affiliate marketing = earn while you sleep"),h("div",{style:{color:MUTED,fontSize:13,marginTop:4,lineHeight:1.5}},"Join free programs, share your link, earn % of every sale. No inventory. No startup cost."))
+      ),
+      h("div",{style:{display:"flex",gap:8,overflowX:"auto",paddingBottom:6,marginBottom:20}},
+        FREE_RES.map((r,i)=>h("button",{key:i,onClick:()=>setTab(i),style:{padding:"8px 16px",borderRadius:100,border:`1px solid ${tab===i?G:BORDER}`,background:tab===i?G+"22":"transparent",color:tab===i?G:MUTED,fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}},r.cat))
+      ),
+      FREE_RES[tab].items.map(item=>h("div",{key:item.name,style:{background:CARD,border:`1px solid ${BORDER}`,borderRadius:14,padding:16,marginBottom:10}},
+        h("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:6}},h("span",{style:{fontSize:20}},item.e),h("span",{style:{fontFamily:"serif",fontWeight:700,fontSize:15}},item.name),h("span",{style:{background:G+"22",color:G,border:`1px solid ${G}44`,borderRadius:100,padding:"2px 8px",fontSize:10,fontWeight:700}},item.badge)),
+        h("div",{style:{fontSize:13,color:"#bbb",lineHeight:1.6}},item.desc),
+        h("div",{style:{marginTop:6,fontSize:12}},h("span",{style:{color:MUTED}},"Potential: "),h("span",{style:{color:G,fontWeight:700}},item.earn)),
+        h("a",{href:item.url,target:"_blank",rel:"noreferrer",style:{display:"block",marginTop:14,background:G,color:"#000",borderRadius:10,padding:"11px",textAlign:"center",fontSize:13,fontWeight:700,textDecoration:"none"}},"Get Started — Free →")
+      )),
+      tab===0&&h("div",{style:{marginTop:10,padding:16,background:"#0c180c",borderRadius:14,border:`1px solid ${G}30`}},
+        h("div",{style:{fontFamily:"serif",fontSize:15,fontWeight:700,marginBottom:12,color:G}},"🎯 How to Start (4 Steps)"),
+        ["Pick 1 program that matches your hustle","Sign up free and get your referral link","Share on WhatsApp, TikTok, Facebook groups","Earn commission on every sale through your link"].map((s,i)=>h("div",{key:i,style:{display:"flex",gap:10,marginBottom:10}},
+          h("div",{style:{width:22,height:22,borderRadius:"50%",background:G+"22",color:G,border:`1px solid ${G}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,flexShrink:0}},i+1),
+          h("span",{style:{fontSize:13,color:"#ccc",lineHeight:1.55}},s)
+        ))
+      )
+    )
+  );
+}
+
+function App(){
+  const [page,setPage]=useState("landing");
+  const [profile,setProfile]=useState({skills:[],custom:[],hours:10,province:"Gauteng",locationType:"Urban",employment:"Employed",capital:"R0 (No capital)",goal:5000});
+  const [skillInput,setSkillInput]=useState("");
+  const [skillWarn,setSkillWarn]=useState(false);
+  const [hustles,setHustles]=useState([]);
+
+  // ── FIX 1: localStorage — lazy initialisers read persisted data on mount
+  const [saved,setSaved]=useState(()=>{
+    try{return JSON.parse(localStorage.getItem("wm_saved"))||[];}catch{return [];}
+  });
+  const [notes,setNotes]=useState(()=>{
+    try{return JSON.parse(localStorage.getItem("wm_notes"))||{};}catch{return {};}
+  });
+  const [stepState,setStepState]=useState(()=>{
+    try{return JSON.parse(localStorage.getItem("wm_stepState"))||{};}catch{return {};}
+  });
+
+  const [sel,setSel]=useState(null);
+  const [loadIdx,setLoadIdx]=useState(0);
+  const [loadPct,setLoadPct]=useState(10);
+  const [err,setErr]=useState(null);
+  const [showPrem,setShowPrem]=useState(false);
+  const [showEmail,setShowEmail]=useState(false);
+  const [expanded,setExpanded]=useState({});
+  const [filter,setFilter]=useState("all");
+  const [bTop,setBTop]=useState(false);
+  const [goalError,setGoalError]=useState(null);
+
+  // ── FIX 1: localStorage — persist each piece of state whenever it changes
+  useEffect(()=>{localStorage.setItem("wm_saved",JSON.stringify(saved));},[saved]);
+  useEffect(()=>{localStorage.setItem("wm_notes",JSON.stringify(notes));},[notes]);
+  useEffect(()=>{localStorage.setItem("wm_stepState",JSON.stringify(stepState));},[stepState]);
+
+  // ── FIX 2: back-button — ref that prevents a popstate-triggered setPage
+  //    from immediately pushing a duplicate history entry
+  const isPopState=useRef(false);
+
+  // ── FIX 2: seed initial history state and register the popstate listener
+  useEffect(()=>{
+    history.replaceState({page:"landing"},"",window.location.pathname);
+    const handler=e=>{
+      const p=e.state&&e.state.page;
+      isPopState.current=true;
+      setPage(p||"landing");
+    };
+    window.addEventListener("popstate",handler);
+    return()=>window.removeEventListener("popstate",handler);
+  },[]);
+
+  // ── FIX 2: push a history entry on every page transition, except for
+  //    transient states (loading / error) and popstate-triggered changes
+  useEffect(()=>{
+    if(page==="loading"||page==="error")return;
+    if(isPopState.current){isPopState.current=false;return;}
+    const url=page==="landing"?window.location.pathname:"#"+page;
+    history.pushState({page},"",url);
+  },[page]);
+
+  useEffect(()=>{const f=()=>setBTop(window.scrollY>300);window.addEventListener("scroll",f);return()=>window.removeEventListener("scroll",f);},[]);
+
+  useEffect(()=>{if(page!=="results")setShowPrem(false);},[page]);
+
+  const allSkills=[...new Set([...profile.skills,...profile.custom])];
+  const isSaved=id=>saved.some(x=>x.id===id);
+  const toggleSave=hh=>setSaved(s=>isSaved(hh.id)?s.filter(x=>x.id!==hh.id):[...s,hh]);
+  const toggleSkill=sk=>{setSkillWarn(false);setProfile(p=>({...p,skills:p.skills.includes(sk)?p.skills.filter(x=>x!==sk):[...p.skills,sk]}));};
+  const addSkill=()=>{const t=skillInput.trim();if(!t)return;const ns=t.split(",").map(s=>s.trim()).filter(Boolean);setProfile(p=>({...p,custom:[...new Set([...p.custom,...ns])],skills:[...new Set([...p.skills,...ns])]}));setSkillInput("");setSkillWarn(false);};
+  const removeCustom=sk=>setProfile(p=>({...p,custom:p.custom.filter(s=>s!==sk),skills:p.skills.filter(s=>s!==sk)}));
+  const toggleStep=(hId,i)=>setStepState(cs=>({...cs,[hId+"-"+i]:!cs[hId+"-"+i]}));
+
+  const runSearch=useCallback(async()=>{
+    setPage("loading");setErr(null);setLoadPct(10);
+    let pct=10;const pI=setInterval(()=>{pct=Math.min(pct+7,90);setLoadPct(pct);},900);
+    let mi=0;const mI=setInterval(()=>{mi++;setLoadIdx(mi%MSGS.length);},1500);
+    try{const r=await fetchHustles(profile);setHustles(r);setLoadPct(100);setTimeout(()=>setPage("results"),400);setTimeout(()=>setShowPrem(true),14000);}
+    catch(e){setErr(e.message||"Unknown error");setPage("error");}
+    finally{clearInterval(pI);clearInterval(mI);}
+  },[profile]);
+
+  const handleFind=()=>{if(allSkills.length===0){setSkillWarn(true);return;}setShowEmail(true);};
+  // ── FIX 2: modal now just continues — no email collected
+  const handleEmail=()=>{setShowEmail(false);runSearch();};
+
+  const filtered=hustles.filter(hh=>{if(filter==="beginner")return hh.difficulty==="Beginner";if(filter==="loadsafe")return hh.loadSheddingSafe;if(filter==="offline")return hh.offline;if(filter==="zero")return hh.startupCost===0;return true;});
+  const coversGoal=hustles.slice(0,3).reduce((s,hh)=>s+(hh.earningsMax||0),0)>=profile.goal;
+  const savedMin=saved.reduce((s,hh)=>s+(hh.earningsMin||0),0);
+  const savedMax=saved.reduce((s,hh)=>s+(hh.earningsMax||0),0);
+
+  const resBtn=h("button",{onClick:()=>setPage("resources"),style:{background:CARD2,border:`1px solid ${G}50`,color:G,borderRadius:10,padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer"}},"📚 Free Resources");
+  const savedBtn=h("button",{onClick:()=>setPage("saved"),style:{background:CARD2,border:`1px solid ${BORDER}`,color:"#ccc",borderRadius:10,padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",gap:6}},"Saved",saved.length>0&&h("span",{style:{background:G,color:"#000",borderRadius:10,padding:"1px 7px",fontSize:11,fontWeight:800}},saved.length));
+
+  if(page==="resources")return h(ResourcesPage,{onBack:()=>setPage("landing")});
+  if(page==="error")return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:24}},
+    h("div",{style:{fontSize:56,marginBottom:16}},"😕"),
+    h("h2",{style:{fontFamily:"serif",fontSize:24,fontWeight:700,marginBottom:10}},"Something went wrong"),
+    h("p",{style:{color:MUTED,fontSize:14,lineHeight:1.7,maxWidth:360,marginBottom:16}},err?.includes("abort")?"The AI is very busy — please try again.":"Couldn't load hustles. Check your connection."),
+    h("div",{style:{background:CARD,border:`1px solid ${BORDER}`,borderRadius:10,padding:"10px 16px",fontSize:11,color:MUTED,marginBottom:28,maxWidth:380,wordBreak:"break-word"}},err),
+    h("button",{onClick:()=>setPage("step3"),style:{background:G,color:"#000",border:"none",borderRadius:14,padding:"14px 32px",fontSize:16,fontWeight:700,cursor:"pointer"}},"← Go Back & Try Again")
+  );
+
+  if(page==="landing")return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh"}},
+    h(NavBar,{right:h(React.Fragment,null,resBtn,savedBtn),onLogo:()=>setPage("landing")}),
+    h("div",{style:{padding:"52px 24px 40px",textAlign:"center",maxWidth:680,margin:"0 auto"}},
+      h("div",{style:{display:"inline-flex",alignItems:"center",gap:6,background:"#1a1a1a",border:`1px solid ${BORDER}`,borderRadius:100,padding:"6px 14px",fontSize:12,color:"#aaa",marginBottom:28}},"⚡ AI-powered · Free · Made for South Africa"),
+      h("h1",{style:{fontFamily:"serif",fontSize:"clamp(30px,7vw,50px)",fontWeight:700,lineHeight:1.12,marginBottom:18}},"Find Your Perfect ",h("span",{style:{color:G}},"Side Hustle")," & Start Earning"),
+      h("p",{style:{fontSize:16,color:"#9ca3af",lineHeight:1.6,marginBottom:32}},"Personalised to your skills, location, and time.",h("br"),h("strong",{style:{color:"#fff"}},"Real rand. Real results.")),
+      h("button",{className:"pulse",onClick:()=>setPage("step1"),style:{background:G,color:"#000",border:"none",borderRadius:14,padding:"15px 32px",fontSize:16,fontWeight:700,cursor:"pointer"}},"Get My Free Hustle Plan →"),
+      h("div",{style:{display:"flex",justifyContent:"center",flexWrap:"wrap",gap:"8px 20px",marginTop:20}},["⊕ Load-shedding proof","◎ ZAR earnings","★ SA platforms only","💸 Free affiliate resources"].map(f=>h("span",{key:f,style:{fontSize:12,color:MUTED}},f)))
+    ),
+    h("div",{style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",borderTop:`1px solid ${BORDER}`,borderBottom:`1px solid ${BORDER}`,padding:"28px 0"}},
+      [{n:"12,400+",l:"Hustles generated"},{n:"R8.2M",l:"Potential monthly earnings"},{n:"9",l:"SA provinces covered"}].map(s=>h("div",{key:s.n,style:{textAlign:"center",padding:"0 12px"}},h("div",{style:{fontFamily:"serif",fontSize:"clamp(22px,5vw,34px)",fontWeight:700,color:G}},s.n),h("div",{style:{fontSize:12,color:MUTED,marginTop:4}},s.l)))
+    ),
+    h("div",{style:{padding:"0 20px",maxWidth:900,margin:"0 auto"}},
+      h("div",{onClick:()=>setPage("resources"),style:{background:"linear-gradient(135deg,#0c1a0c,#0a120a)",border:`1px solid ${G}40`,borderRadius:14,padding:"18px 20px",marginTop:24,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:14}},
+        h("div",null,h("div",{style:{fontFamily:"serif",fontWeight:700,fontSize:16}},"💸 Earn While You Sleep with Affiliate Marketing"),h("div",{style:{color:MUTED,fontSize:13,marginTop:4}},"Free programs · No startup cost · Earn commission on every referral")),
+        h("div",{style:{color:G,fontWeight:700,fontSize:18}},"→")
+      )
+    ),
+    h("div",{style:{padding:"48px 20px",maxWidth:900,margin:"0 auto",textAlign:"center"}},
+      h("h2",{style:{fontFamily:"serif",fontSize:"clamp(22px,4vw,30px)",fontWeight:700,marginBottom:32}},"How It Works"),
+      h("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:14}},
+        [{n:"01",t:"Tell us about you",d:"Share your skills, location, and available hours per week."},{n:"02",t:"AI finds your hustles",d:"Claude AI matches you with real, actionable SA side hustles."},{n:"03",t:"Start earning",d:"Get a step-by-step plan, pitch scripts, and tools to earn your first rand."}].map(c=>h("div",{key:c.n,style:{background:CARD,border:`1px solid ${BORDER}`,borderRadius:14,padding:20,textAlign:"left"}},h("div",{style:{fontFamily:"monospace",fontSize:13,color:G,fontWeight:600,marginBottom:10}},c.n),h("div",{style:{fontFamily:"serif",fontSize:17,fontWeight:700,marginBottom:6}},c.t),h("div",{style:{fontSize:13,color:MUTED,lineHeight:1.55}},c.d)))
+      ),
+      h("button",{className:"pulse",onClick:()=>setPage("step1"),style:{background:G,color:"#000",border:"none",borderRadius:14,padding:"15px 32px",fontSize:16,fontWeight:700,cursor:"pointer",marginTop:36}},"Start Free →")
+    ),
+    h("div",{style:{padding:"0 20px 48px",maxWidth:900,margin:"0 auto",textAlign:"center"}},
+      h("h2",{style:{fontFamily:"serif",fontSize:"clamp(22px,4vw,30px)",fontWeight:700,marginBottom:24}},"Real People. Real Rand."),
+      h("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:14}},
+        TESTIMONIALS.map(t=>h("div",{key:t.name,style:{background:CARD,border:`1px solid ${BORDER}`,borderRadius:16,padding:"20px 18px",textAlign:"left"}},
+          h("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:14}},h("span",{style:{fontSize:28}},t.av),h("div",null,h("div",{style:{fontWeight:700,fontSize:15}},t.name),h("div",{style:{fontSize:12,color:MUTED}},t.loc))),
+          h("p",{style:{fontSize:14,color:"#ccc",lineHeight:1.65,marginBottom:14}},'"'+t.text+'"'),
+          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:12,borderTop:`1px solid ${BORDER}`}},h(Bdg,{color:G},t.hustle),h("span",{style:{fontFamily:"monospace",color:G,fontWeight:700,fontSize:14}},t.earned))
+        ))
+      )
+    ),
+    h("div",{style:{borderTop:`1px solid ${BORDER}`,padding:"24px 20px",textAlign:"center",fontSize:13,color:MUTED}},
+      h("div",{style:{marginBottom:8}},"🔒 We never store or sell your personal data · Made with ❤️ in South Africa"),
+      h("div",null,"© "+new Date().getFullYear()+" workmoneyZA · All rights reserved")
+    ),
+    h(BTop,{v:bTop})
+  );
+
+  if(page==="step1")return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh"}},
+    h(NavBar,{right:h("span",{style:{color:MUTED,fontSize:13,fontWeight:600}},"Step 1 of 3"),onLogo:()=>setPage("landing")}),
+    h(PBar,{step:1}),
+    h("div",{style:{padding:"20px 16px 80px",maxWidth:640,margin:"0 auto"}},
+      h("h2",{style:{fontFamily:"serif",fontSize:24,fontWeight:700,margin:"16px 0 4px"}},"Your Skills"),
+      h("p",{style:{color:MUTED,fontSize:14,marginBottom:22}},"Tap to select — pick all that apply"),
+      h("div",{style:{display:"flex",flexWrap:"wrap",gap:8}},SKILLS.map(sk=>h("button",{key:sk,onClick:()=>toggleSkill(sk),style:{borderRadius:100,padding:"7px 14px",fontSize:13,border:`1px solid ${profile.skills.includes(sk)?G:BORDER}`,background:profile.skills.includes(sk)?G:"transparent",color:profile.skills.includes(sk)?"#000":"#ccc",cursor:"pointer",fontWeight:500}},sk))),
+      profile.custom.length>0&&h("div",{style:{marginTop:14}},h("div",{style:{fontSize:12,color:MUTED,marginBottom:8}},"Your custom skills:"),h("div",{style:{display:"flex",flexWrap:"wrap",gap:7}},profile.custom.map(sk=>h("span",{key:sk,style:{borderRadius:100,padding:"7px 14px",fontSize:13,border:`1px solid ${G}60`,background:"#0c200c",color:G,display:"flex",alignItems:"center",gap:6,fontWeight:500}},"✓ "+sk,h("button",{onClick:()=>removeCustom(sk),style:{background:"none",border:"none",color:G+"80",cursor:"pointer",fontSize:15,lineHeight:1,padding:0}},"×"))))),
+      h("div",{style:{marginTop:20}},
+        h("label",{style:{display:"block",fontSize:13,color:"#aaa",fontWeight:500,marginBottom:8}},"Add a skill not listed above"),
+        h("div",{style:{display:"flex",gap:8}},
+          h("input",{value:skillInput,onChange:e=>setSkillInput(e.target.value),onKeyDown:e=>e.key==="Enter"&&addSkill(),placeholder:"e.g. DJ, mechanic, barber",style:{flex:1,background:CARD2,border:`1px solid ${BORDER}`,borderRadius:12,padding:"13px 16px",fontSize:15,color:"#fff",outline:"none"}}),
+          h("button",{onClick:addSkill,style:{background:G,color:"#000",border:"none",borderRadius:12,padding:"0 18px",fontSize:15,fontWeight:700,cursor:"pointer",flexShrink:0}},"+ Add")
+        ),
+        h("div",{style:{fontSize:11,color:MUTED,marginTop:6}},"Tip: Separate multiple skills with commas, then tap Add")
+      ),
+      h("div",{style:{marginTop:26}},
+        h("label",{style:{display:"block",fontSize:13,color:"#aaa",fontWeight:500,marginBottom:8}},"Available hours per week: ",h("strong",{style:{color:G,fontFamily:"monospace"}},profile.hours+"hrs")),
+        h("input",{type:"range",min:2,max:40,value:profile.hours,onChange:e=>setProfile(p=>({...p,hours:Number(e.target.value)})),style:{width:"100%"}}),
+        h("div",{style:{display:"flex",justifyContent:"space-between",fontSize:11,color:MUTED,marginTop:4}},h("span","2hrs"),h("span","40hrs"))
+      ),
+      allSkills.length>0&&h("div",{style:{marginTop:14,padding:"10px 14px",background:"#0c180c",borderRadius:10,border:`1px solid ${G}30`,fontSize:12,color:G}},"✓ "+allSkills.length+" skill"+(allSkills.length>1?"s":"")+" selected: "+allSkills.slice(0,4).join(", ")+(allSkills.length>4?" +"+(allSkills.length-4)+" more":"")),
+      skillWarn&&h("div",{style:{background:"#1a1500",border:"1px solid #f59e0b40",borderRadius:10,padding:"12px 16px",fontSize:13,color:"#f59e0b",marginTop:12}},"⚠️ Please select at least 1 skill to continue."),
+      h("button",{onClick:()=>{if(allSkills.length===0){setSkillWarn(true);return;}setPage("step2");},style:{background:G,color:"#000",border:"none",borderRadius:14,padding:"15px",fontSize:16,fontWeight:700,cursor:"pointer",width:"100%",marginTop:20}},"Continue →"),
+      h("div",{style:{textAlign:"center",marginTop:14,fontSize:11,color:"#444"}},"🔒 Your data is never stored or shared")
+    ),h(BTop,{v:bTop})
+  );
+
+  if(page==="step2")return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh"}},
+    h(NavBar,{right:h("span",{style:{color:MUTED,fontSize:13,fontWeight:600}},"Step 2 of 3"),onLogo:()=>setPage("landing")}),
+    h(PBar,{step:2}),
+    h("div",{style:{padding:"20px 16px 80px",maxWidth:640,margin:"0 auto"}},
+      h("h2",{style:{fontFamily:"serif",fontSize:24,fontWeight:700,margin:"16px 0 4px"}},"Your Location"),
+      h("p",{style:{color:MUTED,fontSize:14,marginBottom:22}},"Where are you based? Context matters for matching."),
+      h("label",{style:{display:"block",fontSize:13,color:"#aaa",fontWeight:500,marginBottom:8}},"Province"),
+      h("select",{value:profile.province,onChange:e=>setProfile(p=>({...p,province:e.target.value})),style:{width:"100%",background:CARD2,border:`1px solid ${BORDER}`,borderRadius:12,padding:"13px 16px",fontSize:15,color:"#fff",outline:"none",cursor:"pointer",appearance:"none"}},PROVINCES.map(pr=>h("option",{key:pr},pr))),
+      h("label",{style:{display:"block",fontSize:13,color:"#aaa",fontWeight:500,marginBottom:8,marginTop:22}},"Location type"),
+      h("div",{style:{display:"flex",gap:10}},["Urban","Suburban","Rural"].map(t=>h("button",{key:t,onClick:()=>setProfile(p=>({...p,locationType:t})),style:{flex:1,borderRadius:12,padding:"11px 18px",fontSize:14,border:`1px solid ${profile.locationType===t?G:BORDER}`,background:profile.locationType===t?G:"transparent",color:profile.locationType===t?"#000":"#ccc",cursor:"pointer",fontWeight:500}},t))),
+      h("label",{style:{display:"block",fontSize:13,color:"#aaa",fontWeight:500,marginBottom:8,marginTop:22}},"Employment status"),
+      h("div",{style:{display:"flex",gap:10,flexWrap:"wrap"}},["Employed","Unemployed","Student","Freelancer"].map(t=>h("button",{key:t,onClick:()=>setProfile(p=>({...p,employment:t})),style:{flex:1,minWidth:100,borderRadius:12,padding:"11px 18px",fontSize:14,border:`1px solid ${profile.employment===t?G:BORDER}`,background:profile.employment===t?G:"transparent",color:profile.employment===t?"#000":"#ccc",cursor:"pointer",fontWeight:500}},t))),
+      h("div",{style:{display:"flex",gap:10,marginTop:32}},
+        h("button",{onClick:()=>setPage("step1"),style:{flex:1,borderRadius:12,padding:"14px 20px",fontSize:14,border:`1px solid ${BORDER}`,cursor:"pointer",background:"transparent",color:"#fff",fontWeight:600}},"← Back"),
+        h("button",{onClick:()=>setPage("step3"),style:{flex:2,background:G,color:"#000",border:"none",borderRadius:14,padding:"14px",fontSize:16,fontWeight:700,cursor:"pointer"}},"Continue →")
+      )
+    )
+  );
+
+  if(page==="step3")return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh"}},
+    h(NavBar,{right:h("span",{style:{color:MUTED,fontSize:13,fontWeight:600}},"Step 3 of 3"),onLogo:()=>setPage("landing")}),
+    h(PBar,{step:3}),
+    h("div",{style:{padding:"20px 16px 80px",maxWidth:640,margin:"0 auto"}},
+      h("h2",{style:{fontFamily:"serif",fontSize:24,fontWeight:700,margin:"16px 0 4px"}},"Your Goals"),
+      h("p",{style:{color:MUTED,fontSize:14,marginBottom:22}},"How much do you want to earn per month?"),
+      h("label",{style:{display:"block",fontSize:13,color:"#aaa",fontWeight:500,marginBottom:8}},"Upfront capital available"),
+      h("select",{value:profile.capital,onChange:e=>setProfile(p=>({...p,capital:e.target.value})),style:{width:"100%",background:CARD2,border:`1px solid ${BORDER}`,borderRadius:12,padding:"13px 16px",fontSize:15,color:"#fff",outline:"none",cursor:"pointer",appearance:"none"}},CAPITAL.map(c=>h("option",{key:c},c))),
+      h("label",{style:{display:"block",fontSize:13,color:"#aaa",fontWeight:500,marginBottom:8,marginTop:22}},"Monthly income goal (ZAR)"),
+      h("div",{style:{position:"relative"}},
+        h("span",{style:{position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:MUTED,fontSize:16,fontFamily:"monospace"}},"R"),
+        h("input",{
+          type:"number",
+          value:profile.goal,
+          onChange:e=>{
+            const v=Number(e.target.value);
+            setProfile(p=>({...p,goal:v}));
+            if(v<500)setGoalError("Minimum income goal is R500");
+            else if(v>100000)setGoalError("Maximum income goal is R100,000");
+            else setGoalError(null);
+          },
+          onBlur:e=>{
+            const v=Number(e.target.value);
+            const clamped=Math.min(100000,Math.max(500,isNaN(v)||v===0?500:v));
+            setProfile(p=>({...p,goal:clamped}));
+            setGoalError(null);
+          },
+          style:{width:"100%",background:CARD2,border:`1px solid ${goalError?"#ef4444":BORDER}`,borderRadius:12,padding:"13px 16px",paddingLeft:34,fontSize:18,color:"#fff",outline:"none",fontFamily:"monospace"}
+        })
+      ),
+      goalError&&h("div",{style:{display:"flex",alignItems:"center",gap:6,marginTop:7,fontSize:12,color:"#ef4444",fontWeight:500}},"⚠ ",goalError),
+      h("div",{style:{padding:"14px",background:"#0c180c",borderRadius:10,border:`1px solid ${G}30`,marginTop:20,fontSize:13,color:"#aaa",lineHeight:1.6}},
+        h("strong",{style:{color:G}},"Your profile: "),allSkills.length>0?allSkills.slice(0,3).join(", ")+(allSkills.length>3?" +"+(allSkills.length-3)+" more":""):"No skills selected"," · "+profile.province+" · "+profile.hours+"hrs/week"
+      ),
+      h("div",{style:{display:"flex",gap:10,marginTop:28}},
+        h("button",{onClick:()=>setPage("step2"),style:{flex:1,borderRadius:12,padding:"14px 20px",fontSize:14,border:`1px solid ${BORDER}`,cursor:"pointer",background:"transparent",color:"#fff",fontWeight:600}},"← Back"),
+        h("button",{onClick:handleFind,style:{flex:2,background:G,color:"#000",border:"none",borderRadius:14,padding:"14px",fontSize:16,fontWeight:700,cursor:"pointer"}},"Find My Hustles →")
+      ),
+      h("div",{style:{textAlign:"center",marginTop:14,fontSize:11,color:"#444"}},"🔒 We never store or share your personal data")
+    ),
+
+    // ── FIX 2: email modal replaced — no email input, no misleading copy,
+    //    single "Find My Hustles →" button that goes straight to results.
+    showEmail&&h("div",{style:{position:"fixed",inset:0,background:"#000000dd",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}},
+      h("div",{style:{background:"#111",border:`1px solid ${BORDER}`,borderRadius:20,padding:"32px 24px",maxWidth:420,width:"100%",textAlign:"center"}},
+        h("div",{style:{fontSize:40,marginBottom:16}},"🎯"),
+        h("p",{style:{color:MUTED,fontSize:14,lineHeight:1.6,marginBottom:24}},"AI is scanning SA opportunities matched to your skills and location."),
+        h("button",{onClick:handleEmail,style:{background:G,color:"#000",border:"none",borderRadius:14,padding:"14px",fontSize:16,fontWeight:700,cursor:"pointer",width:"100%"}},"Find My Hustles →")
+      )
+    )
+  );
+
+  if(page==="loading")return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:24}},
+    h("div",{style:{width:56,height:56,borderRadius:"50%",border:`3px solid ${G}30`,borderTop:`3px solid ${G}`,animation:"spin 0.8s linear infinite"}}),
+    h("div",{style:{fontFamily:"serif",fontSize:22,fontWeight:700,marginTop:28}},"Finding your perfect hustles…"),
+    h("div",{style:{color:MUTED,marginTop:8,fontSize:14}},MSGS[loadIdx]),
+    h("div",{style:{width:260,height:4,background:"#1a1a1a",borderRadius:2,marginTop:24}},h("div",{style:{height:"100%",background:G,borderRadius:2,width:loadPct+"%",transition:"width 1s ease"}})),
+    h("div",{style:{color:G+"70",fontSize:12,marginTop:18}},"People in "+profile.province+" are earning from these right now")
+  );
+
+  if(page==="results")return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh"}},
+    h(NavBar,{right:h(React.Fragment,null,resBtn,savedBtn),onLogo:()=>setPage("landing")}),
+    h("div",{style:{padding:"16px 16px 6px"}},
+      h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},h("h2",{style:{fontFamily:"serif",fontSize:22,fontWeight:700}},"Your Hustles"),h("button",{onClick:()=>setPage("step1"),style:{background:"none",border:"none",color:MUTED,fontSize:12,cursor:"pointer"}},"← Redo")),
+      h("div",{style:{fontSize:13,color:MUTED,marginTop:3}},profile.province+" · "+profile.hours+"hrs/wk · Goal: R"+profile.goal.toLocaleString("en-ZA")+"/mo"),
+      hustles.length>0&&h("div",{style:{marginTop:12,padding:"10px 14px",background:coversGoal?"#0c180c":"#1a1000",borderRadius:10,border:`1px solid ${coversGoal?G+"40":"#f59e0b40"}`,fontSize:13}},coversGoal?h("span",{style:{color:G}},"✓ Your top 3 hustles could cover your R"+profile.goal.toLocaleString("en-ZA")+"/mo goal"):h("span",{style:{color:"#f59e0b"}},"⚡ Combine 2–3 hustles to hit your R"+profile.goal.toLocaleString("en-ZA")+"/mo target")),
+      h("div",{style:{display:"flex",gap:8,marginTop:12,overflowX:"auto",paddingBottom:6}},
+        [{k:"all",l:"All"},{k:"beginner",l:"🟢 Beginner"},{k:"loadsafe",l:"⚡ Load-safe"},{k:"offline",l:"📶 Offline"},{k:"zero",l:"💰 R0 Start"}].map(f=>h("button",{key:f.k,onClick:()=>setFilter(f.k),style:{padding:"6px 14px",borderRadius:100,border:`1px solid ${filter===f.k?G:BORDER}`,background:filter===f.k?G+"22":"transparent",color:filter===f.k?G:MUTED,fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}},f.l))
+      )
+    ),
+    h("div",{style:{padding:"8px 16px 120px"}},
+      filtered.map(hh=>h(HCard,{key:hh.id,h:hh,saved:isSaved(hh.id),onSave:()=>toggleSave(hh),onDetail:()=>setSel(hh),expanded:!!expanded[hh.id],onToggle:()=>setExpanded(e=>({...e,[hh.id]:!e[hh.id]}))})),
+      filtered.length===0&&h("div",{style:{textAlign:"center",padding:"40px 20px",color:MUTED}},"No hustles match this filter. ",h("button",{onClick:()=>setFilter("all"),style:{background:"none",border:"none",color:G,cursor:"pointer",fontWeight:600}},"Show all")),
+      h("div",{style:{background:CARD,border:"1px solid #25d36640",borderRadius:16,padding:"18px 20px",marginTop:12,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}},
+        h("div",null,h("div",{style:{fontWeight:700,fontSize:15}},"📲 Share with friends"),h("div",{style:{color:MUTED,fontSize:13,marginTop:3}},"Know someone who needs extra income?")),
+        h("button",{onClick:()=>{const top=hustles.reduce((m,hh)=>hh.earningsMax>m?hh.earningsMax:m,0);const msg="💸 I found side hustles earning up to R"+top.toLocaleString("en-ZA")+"/mo in "+profile.province+" using workmoneyZA!\n\n🎯 FREE & takes 2 mins 👉 https://workmoneyza.vercel.app";window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");},style:{background:"#25d366",color:"#000",border:"none",borderRadius:12,padding:"10px 18px",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}},"Share")
+      ),
+      h("div",{onClick:()=>setPage("resources"),style:{background:"linear-gradient(135deg,#0c1a0c,#081408)",border:`1px solid ${G}40`,borderRadius:16,padding:"20px",marginTop:10,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}},
+        h("div",null,h("div",{style:{fontSize:20,marginBottom:4}},"💸"),h("div",{style:{fontFamily:"serif",fontSize:17,fontWeight:700}},"Earn Extra with Affiliate Marketing"),h("div",{style:{color:MUTED,fontSize:13,marginTop:4}},"Free programs — earn commission on products you recommend")),
+        h("div",{style:{color:G,fontSize:22}},"→")
+      ),
+      h("div",{style:{background:"linear-gradient(135deg,#0f1f0f,#0a1a0a)",border:`1px solid ${G}40`,borderRadius:16,padding:"24px",marginTop:12,textAlign:"center"}},
+        h("div",{style:{fontSize:32,marginBottom:10}},"🚀"),
+        h("div",{style:{fontFamily:"serif",fontSize:20,fontWeight:700}},"Get Your 7-Day Action Plan"),
+        h("div",{style:{color:MUTED,fontSize:13,marginTop:8,lineHeight:1.6}},"Day-by-day plan + scripts + templates to make your first ",h("strong",{style:{color:G}},"R1 000")," this week"),
+        h("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",gap:14,marginTop:20}},
+          h("button",{onClick:()=>setShowPrem(true),style:{background:G,color:"#000",border:"none",borderRadius:14,padding:"13px 28px",fontSize:16,fontWeight:700,cursor:"pointer"}},"Get Plan — R49"),
+          h("span",{style:{color:MUTED,textDecoration:"line-through",fontSize:14}},"R99")
+        )
+      )
+    ),
+    sel&&h(Detail,{hh:sel,saved:isSaved(sel.id),onSave:()=>toggleSave(sel),onClose:()=>setSel(null),steps:stepState,onStep:toggleStep}),
+    showPrem&&h("div",{style:{position:"fixed",inset:0,background:"#000000cc",zIndex:300,display:"flex",alignItems:"flex-end"},onClick:()=>setShowPrem(false)},
+      h("div",{onClick:e=>e.stopPropagation(),style:{background:"#0f0f0f",width:"100%",maxWidth:600,margin:"0 auto",borderRadius:"20px 20px 0 0",padding:"8px 20px 44px",maxHeight:"88vh",overflowY:"auto",border:`1px solid ${BORDER}`}},
+        h("div",{style:{width:36,height:4,background:"#333",borderRadius:2,margin:"14px auto 20px"}}),
+        h("div",{style:{textAlign:"center",marginBottom:22}},h("div",{style:{fontSize:36}},"🚀"),h("h2",{style:{fontFamily:"serif",fontSize:22,fontWeight:700,marginTop:10}},"7-Day Action Plan"),h("p",{style:{color:MUTED,fontSize:13,marginTop:6,lineHeight:1.6}},"Make your first R1 000 in 7 days in "+profile.province)),
+        [{d:1,t:"Set up tools & WhatsApp Business"},{d:2,t:"Post on Gumtree, Facebook Marketplace & local groups"},{d:3,t:"DM 20 potential clients with your pitch script"},{d:4,t:"Follow up, negotiate, close your first deal"},{d:5,t:"Deliver, collect payment, request a review"},{d:6,t:"Onboard 2 more clients via referral script"},{d:7,t:"Celebrate — you made your first R1 000!"}].map(d=>h("div",{key:d.d,style:{display:"flex",alignItems:"center",gap:12,padding:"11px 0",borderBottom:`1px solid ${BORDER}`}},h("div",{style:{width:30,height:30,borderRadius:"50%",background:G+"22",color:G,border:`1px solid ${G}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,flexShrink:0}},"D"+d.d),h("span",{style:{fontSize:14,color:"#f0f0f0",lineHeight:1.5}},d.t))),
+        h("div",{style:{marginTop:22,textAlign:"center"}},
+          h("div",{style:{fontSize:12,color:MUTED,marginBottom:10}},"Launch price — ",h("span",{style:{textDecoration:"line-through"}},"R99")),
+
+          // ── FIX 1: PayFast button — wired up when PAYFAST_MERCHANT_ID is set,
+          //    disabled with "Coming Soon" label while it is null.
+          h("button",{
+            disabled:!PAYFAST_MERCHANT_ID,
+            onClick:PAYFAST_MERCHANT_ID
+              ? ()=>{ window.location.href="https://www.payfast.co.za/eng/process"
+                  +"?merchant_id="+encodeURIComponent(PAYFAST_MERCHANT_ID)
+                  +"&amount=49.00"
+                  +"&item_name="+encodeURIComponent("workmoneyZA 7-Day Action Plan"); }
+              : undefined,
+            style:{
+              background:PAYFAST_MERCHANT_ID?G:"#2a2a2a",
+              color:PAYFAST_MERCHANT_ID?"#000":"#555",
+              border:"none",
+              borderRadius:14,
+              padding:"16px",
+              fontSize:16,
+              fontWeight:700,
+              cursor:PAYFAST_MERCHANT_ID?"pointer":"not-allowed",
+              width:"100%",
+              opacity:PAYFAST_MERCHANT_ID?1:0.7
+            }
+          }, PAYFAST_MERCHANT_ID ? "Pay R49 via PayFast →" : "Coming Soon"),
+
+          h("div",{style:{fontSize:11,color:MUTED,marginTop:8}},"🔒 Secure SA payment · Instant access"),
+          h("button",{onClick:()=>setShowPrem(false),style:{marginTop:14,background:"none",border:"none",color:MUTED,cursor:"pointer",fontSize:13}},"No thanks")
+        )
+      )
+    ),
+    h(BTop,{v:bTop})
+  );
+
+  if(page==="saved")return h("div",{style:{background:BG,color:"#f0f0f0",minHeight:"100vh"}},
+    h(NavBar,{right:resBtn,onLogo:()=>setPage("landing")}),
+    h("div",{style:{padding:"16px 16px 80px"}},
+      h("div",{style:{display:"flex",alignItems:"center",gap:12,marginBottom:22}},
+        h("button",{onClick:()=>setPage(hustles.length?"results":"landing"),style:{background:"none",border:"none",color:MUTED,cursor:"pointer",fontSize:22}},"←"),
+        h("h2",{style:{fontFamily:"serif",fontSize:24,fontWeight:700}},"Saved Hustles")
+      ),
+      saved.length===0?h("div",{style:{textAlign:"center",padding:"60px 20px",color:MUTED}},
+        h("div",{style:{fontSize:52,marginBottom:14}},"📋"),
+        h("div",{style:{fontSize:16}},"No saved hustles yet"),
+        h("div",{style:{fontSize:13,marginTop:6}},"Star hustles on the results page to save them here"),
+        h("button",{onClick:()=>setPage(hustles.length?"results":"landing"),style:{background:G,color:"#000",border:"none",borderRadius:14,padding:"14px 28px",fontSize:15,fontWeight:700,cursor:"pointer",marginTop:24}},hustles.length?"Back to Results":"Find Hustles")
+      ):h(React.Fragment,null,
+        saved.map(hh=>h("div",{key:hh.id,style:{background:CARD,border:`1px solid ${BORDER}`,borderRadius:14,padding:16,marginBottom:12}},
+          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}},
+            h("div",{style:{flex:1}},h("div",{style:{fontFamily:"serif",fontWeight:700,fontSize:16}},hh.title),h("div",{style:{color:MUTED,fontSize:13,marginTop:3}},hh.description),h("div",{style:{color:G,fontWeight:700,fontSize:14,marginTop:6,fontFamily:"monospace"}},"R"+(hh.earningsMin||0).toLocaleString("en-ZA")+" – R"+(hh.earningsMax||0).toLocaleString("en-ZA")+"/mo")),
+            h("button",{onClick:()=>setSaved(s=>s.filter(x=>x.id!==hh.id)),style:{background:"none",border:"none",cursor:"pointer",fontSize:18,color:"#555",padding:4}},"🗑")
+          ),
+          h("label",{style:{display:"block",fontSize:11,color:"#aaa",fontWeight:500,marginBottom:6,marginTop:14,textTransform:"uppercase",letterSpacing:0.5}},"Notes"),
+          h("textarea",{value:notes[hh.id]||"",onChange:e=>setNotes(n=>({...n,[hh.id]:e.target.value})),placeholder:"Add your notes, ideas, progress…",style:{width:"100%",background:CARD2,border:`1px solid ${BORDER}`,borderRadius:10,padding:"10px 14px",fontSize:13,color:"#ccc",resize:"vertical",outline:"none"},rows:3}),
+          h("button",{onClick:()=>{setSel(hh);setPage("results");},style:{marginTop:10,width:"100%",borderRadius:12,padding:"11px 20px",fontSize:14,border:`1px solid ${G}`,cursor:"pointer",background:"transparent",color:G,fontWeight:600}},"View Full Plan & Progress →")
+        )),
+        saved.length>0&&h("div",{style:{textAlign:"center",padding:"22px",borderTop:`1px solid ${BORDER}`,marginTop:8}},h("div",{style:{fontSize:12,color:MUTED,marginBottom:4}},"Combined monthly potential"),h("div",{style:{fontFamily:"serif",fontSize:22,fontWeight:700,color:G}},"R"+savedMin.toLocaleString("en-ZA")+" – R"+savedMax.toLocaleString("en-ZA")+"/mo"))
+      ),
+      sel&&h(Detail,{hh:sel,saved:isSaved(sel.id),onSave:()=>toggleSave(sel),onClose:()=>setSel(null),steps:stepState,onStep:toggleStep})
+    ),
+    h(BTop,{v:bTop})
+  );
+
+  return null;
+}
+
+ReactDOM.createRoot(document.getElementById("app")).render(React.createElement(App));
+}
+</script>
+</body>
+</html>
